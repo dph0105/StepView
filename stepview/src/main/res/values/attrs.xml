@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="StepView">
+        <!--步骤点的个数-->
+        <attr name="count" format="integer"/>
+        <!--普通的步骤点，进行中的步骤点和已经完成的步骤点-->
+        <attr name="normal_point" format="reference"/>
+        <attr name="ongoing_point" format="reference"/>
+        <attr name="completed_point" format="reference"/>
+        <!--线条的宽度-->
+        <attr name="line_width" format="dimension"/>
+        <!--未完成的线条的颜色-->
+        <attr name="line_normal_color" format="color"/>
+        <!--已完成的线条的颜色-->
+        <attr name="line_completed_color" format="color"/>
+        <!--说明文字的大小以及颜色-->
+        <attr name="desc_textSize" format="dimension"/>
+        <attr name="desc_normal_textColor" format="color"/>
+        <attr name="desc_ongoing_textColor" format="color"/>
+        <attr name="desc_completed_textColor" format="color"/>
+        <!--步骤的进度条距离说明文字的距离-->
+        <attr name="distance_from_text" format="dimension"/>
+        <!--文字处于上方或者下方,水平时：0上面，1下面。垂直时：0左边，1右边-->
+        <attr name="text_location" format="enum">
+            <enum name="downOrRight" value="0"/>
+            <enum name="upOrLeft" value="1"/>
+        </attr>
+        <!--步骤条的方向-->
+        <attr name="step_oriention" format="enum">
+            <enum name="horizontal" value="0"/>
+            <enum name="vertical" value="1"/>
+        </attr>
+
+        
+    </declare-styleable>
+</resources>
