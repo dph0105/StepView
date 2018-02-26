@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <declare-styleable name="StepView">
+    <declare-styleable name="HorizontalStepView">
         <!--步骤点的个数-->
         <attr name="count" format="integer"/>
         <!--普通的步骤点，进行中的步骤点和已经完成的步骤点-->
