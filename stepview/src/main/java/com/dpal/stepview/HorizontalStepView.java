@@ -14,8 +14,10 @@ import android.text.StaticLayout;
 import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.view.View;
+import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -145,7 +147,6 @@ public class HorizontalStepView extends View {
 
     private void init(Context context, AttributeSet attrs, int defStyleAttr) {
         linePaint.setAntiAlias(true);
-
         textPaint.setAntiAlias(true);
 
 
@@ -166,7 +167,7 @@ public class HorizontalStepView extends View {
         lineWidth = a.getDimensionPixelSize(R.styleable.HorizontalStepView_line_width, 16);
         lineNormalColor = a.getColor(R.styleable.HorizontalStepView_line_normal_color, Color.parseColor("#ff5566"));
         lineCompletedColor = a.getColor(R.styleable.HorizontalStepView_line_completed_color, Color.parseColor("#ff0000"));
-        descTextSize = a.getDimensionPixelSize(R.styleable.HorizontalStepView_desc_textSize, 15);
+        descTextSize = (int)a.getDimension(R.styleable.HorizontalStepView_desc_textSize, 18);
         descNormalTextColor = a.getColor(R.styleable.HorizontalStepView_desc_normal_textColor, Color.BLACK);
         descOngoingTextColor = a.getColor(R.styleable.HorizontalStepView_desc_ongoing_textColor, Color.BLACK);
         descCompletedTextColor = a.getColor(R.styleable.HorizontalStepView_desc_completed_textColor, Color.BLACK);
@@ -178,12 +179,13 @@ public class HorizontalStepView extends View {
         normalBitmap = BitmapFactory.decodeResource(getResources(), normalPointResId);
         ongoingBitmap = BitmapFactory.decodeResource(getResources(), ongoingPointResId);
         completedBitmap = BitmapFactory.decodeResource(getResources(), completedPointResId);
+        textPaint.setTextSize(descTextSize);
+        linePaint.setStrokeWidth(lineWidth);
     }
 
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
-
     }
 
     @Override
@@ -206,7 +208,7 @@ public class HorizontalStepView extends View {
         int left = getPaddingStart();
         //画连线
         //画已完成的线
-        linePaint.setStrokeWidth(lineWidth);
+
         int startX1 = left+stepWidth/2;
         int stopX1 = startX1+stepWidth*currentVal+stepInterval*currentVal;
         int startY = barHeight/2;
@@ -218,10 +220,9 @@ public class HorizontalStepView extends View {
         linePaint.setColor(lineCompletedColor);
         canvas.drawLine(stopX1,startY,widthSize-getPaddingEnd()-stepWidth/2,stopY,linePaint);
 
+        //画步骤点
         for (int i=0;i<count;i++){
-            //画步骤点
             if (i==currentVal){
-
                 canvas.drawBitmap(ongoingBitmap,left+stepWidth/2-ongoingBitmap.getWidth()/2,getPaddingTop(),linePaint);
             }else if (i<currentVal){
                 canvas.drawBitmap(completedBitmap,left+stepWidth/2-completedBitmap.getWidth()/2,getPaddingTop(),linePaint);
@@ -231,6 +232,19 @@ public class HorizontalStepView extends View {
             left = left + stepWidth + stepInterval;
 
         }
+
+        //画文字
+        canvas.save();
+        canvas.translate(0,barHeight+distanceFromText);
+        for(int i=0;i<staticLayouts.size();i++){
+            float dx = getPaddingStart()+stepWidth*i+stepInterval*i;
+
+            staticLayouts.get(i).draw(canvas);
+            canvas.translate(stepWidth+stepInterval,0);
+        }
+        canvas.restore();
+
+
     }
 
     @Override
@@ -271,9 +285,9 @@ public class HorizontalStepView extends View {
                 barHeight = getMax(normalBitmap.getHeight(), ongoingBitmap.getHeight(), completedBitmap.getHeight(), lineWidth);
                 if (descriptions.size() != 0) {
                     //如果有说明文字，那么高度的大小就要加上说明文字中的最大高度
-                    trueSize = barHeight + getMultiTextMaxHeight() + getPaddingTop() + getPaddingBottom();
+                    trueSize = barHeight + getMultiTextMaxHeight() + getPaddingTop() + getPaddingBottom() + distanceFromText;
                 } else {
-                    trueSize = barHeight + getPaddingTop() + getPaddingBottom();
+                    trueSize = barHeight + getPaddingTop() + getPaddingBottom() + distanceFromText;
                 }
                 break;
             case MeasureSpec.EXACTLY://如果测量模式是精确值，也就是固定的大小
@@ -296,6 +310,7 @@ public class HorizontalStepView extends View {
         return temp;
     }
 
+    //获得多个Text最大的高度
     private int getMultiTextMaxHeight(){
         int temp = 0;
         staticLayouts.clear();
@@ -309,8 +324,15 @@ public class HorizontalStepView extends View {
         return temp;
     }
 
-    public void setDescs(List<String> descs){
+    public void setDescriptions(List<String> descs){
         descriptions.clear();
         descriptions.addAll(descs);
+        invalidate();
+        requestLayout();
+    }
+
+    public void setDescriptions(String[] descs){
+        descriptions.clear();
+        setDescriptions(Arrays.asList(descs));
     }
 }

@@ -6,9 +6,11 @@
     android:layout_height="match_parent"
     tools:context="com.dpal.stepview.MainActivity">
     <com.dpal.stepview.HorizontalStepView
-        android:layout_width="match_parent"
+        android:id="@+id/hsv"
+        android:layout_width="300dp"
         android:layout_height="wrap_content"
         app:count="3"
-        app:line_width="10dp"/>
+        app:line_width="10dp"
+        app:desc_textSize="30sp"/>
 
 </android.support.constraint.ConstraintLayout>
