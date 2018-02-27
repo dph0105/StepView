@@ -20,17 +20,24 @@
         <attr name="desc_completed_textColor" format="color"/>
         <!--步骤的进度条距离说明文字的距离-->
         <attr name="distance_from_text" format="dimension"/>
-        <!--文字处于上方或者下方,水平时：0上面，1下面。垂直时：0左边，1右边-->
+        <!--文字处于上方或者下方：0下面，1上面-->
         <attr name="text_location" format="enum">
-            <enum name="downOrRight" value="0"/>
-            <enum name="upOrLeft" value="1"/>
+            <enum name="down" value="0"/>
+            <enum name="up" value="1"/>
         </attr>
-        <!--步骤条的方向-->
-        <attr name="step_oriention" format="enum">
-            <enum name="horizontal" value="0"/>
-            <enum name="vertical" value="1"/>
+        <!--普通的步骤点，进行中的步骤点和已经完成的步骤点的宽高-->
+        <attr name="normal_point_width" format="dimension"/>
+        <attr name="ongoing_point_width" format="dimension"/>
+        <attr name="completed_point_width" format="dimension"/>
+        <!--步骤项宽高的计算方式-->
+        <attr name="stepWidthMode" format="enum">
+            <!--根据View的宽度均分-->
+            <enum name="average" value="0"/>
+            <!--自己设置的宽度，这种模式下，要设置步骤项的宽度，如果设置依旧是average-->
+            <enum name="fixed" value="1"/>
         </attr>
-
+        <!--步骤项的宽度-->
+        <attr name="step_width" format="dimension"/>
         
     </declare-styleable>
 </resources>
