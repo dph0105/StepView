@@ -24,10 +24,10 @@ import java.util.List;
  * @date 2018/2/23
  */
 
-public class HorizontalStepView extends View {
+public class VerticalStepView extends View {
 
-    public static final int TEXT_LOCATION_DOWN = 0;//文字在下
-    public static final int TEXT_LOCATION_UP = 1;//文字在上
+    public static final int TEXT_LOCATION_RIGHT = 0;//文字在右
+    public static final int TEXT_LOCATION_LEFT = 1;//文字在左
 
     public static final int STEP_WIDTH_MODE_AVERAGE = 0;
     public static final int STEP_WIDTH_MODE_FIXED = 1;
@@ -106,7 +106,6 @@ public class HorizontalStepView extends View {
      */
     private int distanceFromText;
     /**
-     * 说明文字相对于步骤条的位置，如果是水平方向时，0表示在下面，1表示在上面；
      * 如果是垂直方向时，0表示在右边，1表示在左边
      */
     private int textLocation;
@@ -151,15 +150,15 @@ public class HorizontalStepView extends View {
      */
     public int stepWidthMode;
 
-    public HorizontalStepView(Context context) {
+    public VerticalStepView(Context context) {
         this(context,null);
     }
 
-    public HorizontalStepView(Context context, @Nullable AttributeSet attrs) {
+    public VerticalStepView(Context context, @Nullable AttributeSet attrs) {
         this(context, attrs,0);
     }
 
-    public HorizontalStepView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+    public VerticalStepView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         init(context,attrs,defStyleAttr);
     }
@@ -188,7 +187,7 @@ public class HorizontalStepView extends View {
         descOngoingTextColor = a.getColor(R.styleable.HorizontalStepView_desc_ongoing_textColor, Color.BLACK);
         descCompletedTextColor = a.getColor(R.styleable.HorizontalStepView_desc_completed_textColor, Color.BLACK);
         distanceFromText = a.getDimensionPixelSize(R.styleable.HorizontalStepView_distance_from_text, 10);
-        textLocation = a.getInt(R.styleable.HorizontalStepView_text_location, TEXT_LOCATION_DOWN);
+        textLocation = a.getInt(R.styleable.HorizontalStepView_text_location,TEXT_LOCATION_RIGHT);
         ongoingPointWidth = a.getDimensionPixelSize(R.styleable.HorizontalStepView_ongoing_point_width,ongoingPointWidth);
         completedPointWidth = a.getDimensionPixelSize(R.styleable.HorizontalStepView_completed_point_width,completedPointWidth);
         normalPointWidth = a.getDimensionPixelSize(R.styleable.HorizontalStepView_normal_point_width,normalPointWidth);
@@ -220,11 +219,11 @@ public class HorizontalStepView extends View {
 
         //画连线
         //画已完成的线
-        int startX1 = getPaddingStart()+stepWidth/2;
-        int stopX1 = startX1+stepWidth*currentVal+stepInterval*currentVal;
-        int startY = getPaddingTop() + barHeight/2;
-        int stopY = getPaddingTop()+ barHeight/2;
-        if (textLocation==TEXT_LOCATION_UP){
+        int startX1 = getPaddingStart()+barHeight/2;
+        int stopX1 = getPaddingStart()+barHeight/2;
+        int startY = getPaddingTop()+stepWidth/2;
+        int stopY = getPaddingTop()+stepWidth*count+stepInterval*(count-1);
+        if (textLocation==TEXT_LOCATION_LEFT){
             startY += textMaxHeight+distanceFromText;
             stopY += textMaxHeight+distanceFromText;
         }
@@ -318,7 +317,7 @@ public class HorizontalStepView extends View {
         Rect srcRect = new Rect(0,0,bitmap.getWidth(),bitmap.getHeight());
 
         int destLeft;
-        int destTop = textLocation==TEXT_LOCATION_UP?getPaddingTop()+textMaxHeight+distanceFromText:getPaddingTop();
+        int destTop = textLocation==TEXT_LOCATION_LEFT?getPaddingTop()+textMaxHeight+distanceFromText:getPaddingTop();
         int destRight;
         int destBottom;
         if (setWidth==0){
