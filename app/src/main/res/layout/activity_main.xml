@@ -1,41 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context="com.dpal.stepview.MainActivity">
 
-    <HorizontalScrollView
+
+
+    <com.dpal.stepview.HorizontalStepView
+        android:id="@+id/hsv"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        app:count="5"
+        app:normal_point="@mipmap/normal"
+        app:ongoing_point="@drawable/default_ongoing_point"
+        app:completed_point="@drawable/default_completed_point"
+        app:line_width="2dp"
+        app:line_completed_color="#e55995"
+        app:line_normal_color="#dddddd"
+        />
 
-
-            <com.dpal.stepview.HorizontalStepView
-                android:id="@+id/hsv"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:count="4"
-                app:line_width="2dp"
-                app:desc_textSize="12sp"
-                app:line_normal_color="#dddddd"
-                app:line_completed_color="#e55995"
-                app:normal_point="@mipmap/normal"
-                app:completed_point="@mipmap/completed"
-                app:ongoing_point="@mipmap/ongoing"
-                app:desc_normal_textColor="#c3c3c3"
-                app:desc_ongoing_textColor="#151515"
-                app:desc_completed_textColor="#151515"
-                app:step_width="100dp"
-                app:text_location="up"
-                app:stepWidthMode="fixed"
-                />
-
-
-
-
-    </HorizontalScrollView>
+    <com.dpal.stepview.VerticalStepView
+        android:id="@+id/vsv"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        app:count="5"
+        app:normal_point="@mipmap/normal"
+        app:ongoing_point="@drawable/default_ongoing_point"
+        app:completed_point="@drawable/default_completed_point"
+        app:line_width="2dp"
+        app:line_completed_color="#e55995"
+        app:line_normal_color="#dddddd"
+        android:background="#f2f2f2"
+        app:desc_textSize="17sp"
+        />
 
 
 
-</android.support.constraint.ConstraintLayout>
+
+
+
+
+
+</LinearLayout>

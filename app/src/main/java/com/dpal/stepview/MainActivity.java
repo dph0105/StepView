@@ -17,12 +17,13 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         HorizontalStepView hsv = (HorizontalStepView) findViewById(R.id.hsv);
+        VerticalStepView vsv = (VerticalStepView) findViewById(R.id.vsv);
         List<String> descs = new ArrayList<>();
-        descs.add("已完成");
-        descs.add("进行中");
+        descs.add("已完成已完成已完成已完成已完成已完成已完成已完成");
         descs.add("未开始");
         descs.add("未开始");
         hsv.setDescriptions(descs);
+        vsv.setDescriptions(descs);
 
     }
 }

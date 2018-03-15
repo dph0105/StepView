@@ -8,12 +8,16 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.support.annotation.Nullable;
 import android.text.Layout;
 import android.text.StaticLayout;
 import android.text.TextPaint;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,8 +33,8 @@ public class VerticalStepView extends View {
     public static final int TEXT_LOCATION_RIGHT = 0;//文字在右
     public static final int TEXT_LOCATION_LEFT = 1;//文字在左
 
-    public static final int STEP_WIDTH_MODE_AVERAGE = 0;
-    public static final int STEP_WIDTH_MODE_FIXED = 1;
+    public static final int STEP_HEIGHT_MODE_AVERAGE = 0;
+    public static final int STEP_HEIGHT_MODE_FIXED = 1;
 
     /**
      * 步骤的数量
@@ -43,20 +47,17 @@ public class VerticalStepView extends View {
     /**
      * 普通的步骤点的图标
      */
-    private int normalPointResId;
-    private Bitmap normalBitmap;
+    private Drawable normalDrawable;
 
     /**
      * 正在进行中的步骤点的图标
      */
-    private int ongoingPointResId;
-    private Bitmap ongoingBitmap;
+    private Drawable ongoingDrawable;
 
     /**
      * 已经完成的步骤点的图标
      */
-    private int completedPointResId;
-    private Bitmap completedBitmap;
+    private Drawable completedDrawable;
     /**
      * 步骤条的线条宽度
      */
@@ -117,9 +118,9 @@ public class VerticalStepView extends View {
     private List<StaticLayout> staticLayouts = new ArrayList<>();
 
     /**
-     * 每个步骤项的宽度；
+     * 每个步骤项的高度；
      */
-    private int stepWidth = 100;
+    private int stepHeight = 100;
 
     /**
      * 步骤项与步骤项之间的间隔，默认为0
@@ -131,24 +132,24 @@ public class VerticalStepView extends View {
     private Paint linePaint = new Paint();
 
     /**
-     * 步骤条的高度
+     * 步骤条的宽度
      */
-    private int barHeight;
+    private int barWidth;
 
     /**
      * view的宽度
      */
     private int widthSize;
     /**
-     * 说明文字的最大高度
+     * 说明文字的宽度
      */
-    public int textMaxHeight;
+    public int textWidth;
     /**
      * 步骤项宽高的计算方式
-     * STEP_WIDTH_MODE_AVERAGE:View的宽度均分
-     * STEP_WIDTH_MODE_FIXED:自己设置的宽度，这种模式下，必须要设置步骤项的宽度，否则报错
+     * STEP_HEIGHT_MODE_AVERAGE:View的宽度均分
+     * STEP_HEIGHT_MODE_FIXED:自己设置的宽度，这种模式下，必须要设置步骤项的宽度，否则报错
      */
-    public int stepWidthMode;
+    public int stepHeightMode;
 
     public VerticalStepView(Context context) {
         this(context,null);
@@ -166,7 +167,7 @@ public class VerticalStepView extends View {
     private void init(Context context, AttributeSet attrs, int defStyleAttr) {
         linePaint.setAntiAlias(true);
 
-        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.HorizontalStepView, defStyleAttr, 0);
+        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.VerticalStepView, defStyleAttr, 0);
         count = a.getInt(R.styleable.HorizontalStepView_count, 1);
         if (count<2){
             //点数必须大于等于2，否则抛出异常
@@ -175,28 +176,27 @@ public class VerticalStepView extends View {
         if (currentVal+1>count){
             throw new IllegalArgumentException("CurrentVal must be less than count!");
         }
-        normalPointResId = a.getResourceId(R.styleable.HorizontalStepView_normal_point,R.drawable.timg);
-        ongoingPointResId = a.getResourceId(R.styleable.HorizontalStepView_ongoing_point, R.drawable.timg);
-        completedPointResId = a.getResourceId(R.styleable.HorizontalStepView_completed_point, R.drawable.timg);
 
-        lineWidth = a.getDimensionPixelSize(R.styleable.HorizontalStepView_line_width, 16);
-        lineNormalColor = a.getColor(R.styleable.HorizontalStepView_line_normal_color, Color.parseColor("#ff5566"));
-        lineCompletedColor = a.getColor(R.styleable.HorizontalStepView_line_completed_color, Color.parseColor("#ff0000"));
-        descTextSize = a.getDimensionPixelSize(R.styleable.HorizontalStepView_desc_textSize, 18);
-        descNormalTextColor = a.getColor(R.styleable.HorizontalStepView_desc_normal_textColor, Color.BLACK);
-        descOngoingTextColor = a.getColor(R.styleable.HorizontalStepView_desc_ongoing_textColor, Color.BLACK);
-        descCompletedTextColor = a.getColor(R.styleable.HorizontalStepView_desc_completed_textColor, Color.BLACK);
-        distanceFromText = a.getDimensionPixelSize(R.styleable.HorizontalStepView_distance_from_text, 10);
-        textLocation = a.getInt(R.styleable.HorizontalStepView_text_location,TEXT_LOCATION_RIGHT);
-        ongoingPointWidth = a.getDimensionPixelSize(R.styleable.HorizontalStepView_ongoing_point_width,ongoingPointWidth);
-        completedPointWidth = a.getDimensionPixelSize(R.styleable.HorizontalStepView_completed_point_width,completedPointWidth);
-        normalPointWidth = a.getDimensionPixelSize(R.styleable.HorizontalStepView_normal_point_width,normalPointWidth);
-        stepWidthMode = a.getInt(R.styleable.HorizontalStepView_stepWidthMode, STEP_WIDTH_MODE_AVERAGE);
-        stepWidth = a.getDimensionPixelSize(R.styleable.HorizontalStepView_step_width,stepWidth);
+        normalDrawable = a.getDrawable(R.styleable.VerticalStepView_normal_point);
+        ongoingDrawable = a.getDrawable(R.styleable.VerticalStepView_ongoing_point);
+        completedDrawable = a.getDrawable(R.styleable.VerticalStepView_completed_point);
+        lineWidth = a.getDimensionPixelSize(R.styleable.VerticalStepView_line_width, 16);
+        lineNormalColor = a.getColor(R.styleable.VerticalStepView_line_normal_color, Color.parseColor("#ff5566"));
+        lineCompletedColor = a.getColor(R.styleable.VerticalStepView_line_completed_color, Color.parseColor("#ff0000"));
+        descTextSize = a.getDimensionPixelSize(R.styleable.VerticalStepView_desc_textSize, 18);
+        descNormalTextColor = a.getColor(R.styleable.VerticalStepView_desc_normal_textColor, Color.BLACK);
+        descOngoingTextColor = a.getColor(R.styleable.VerticalStepView_desc_ongoing_textColor, Color.BLACK);
+        descCompletedTextColor = a.getColor(R.styleable.VerticalStepView_desc_completed_textColor, Color.BLACK);
+        distanceFromText = a.getDimensionPixelSize(R.styleable.VerticalStepView_distance_from_text, 10);
+        textLocation = a.getInt(R.styleable.VerticalStepView_vertical_text_location,TEXT_LOCATION_RIGHT);
+        ongoingPointWidth = a.getDimensionPixelSize(R.styleable.VerticalStepView_ongoing_point_width,ongoingPointWidth);
+        completedPointWidth = a.getDimensionPixelSize(R.styleable.VerticalStepView_completed_point_width,completedPointWidth);
+        normalPointWidth = a.getDimensionPixelSize(R.styleable.VerticalStepView_normal_point_width,normalPointWidth);
+        stepHeight = a.getDimensionPixelSize(R.styleable.VerticalStepView_step_height,stepHeight);
+
+        stepHeightMode = a.getInt(R.styleable.VerticalStepView_stepHeightMode, STEP_HEIGHT_MODE_AVERAGE);
         a.recycle();
-        normalBitmap = BitmapFactory.decodeResource(getResources(), normalPointResId);
-        ongoingBitmap = BitmapFactory.decodeResource(getResources(), ongoingPointResId);
-        completedBitmap = BitmapFactory.decodeResource(getResources(), completedPointResId);
+
         linePaint.setStrokeWidth(lineWidth);
     }
 
@@ -219,39 +219,55 @@ public class VerticalStepView extends View {
 
         //画连线
         //画已完成的线
-        int startX1 = getPaddingStart()+barHeight/2;
-        int stopX1 = getPaddingStart()+barHeight/2;
-        int startY = getPaddingTop()+stepWidth/2;
-        int stopY = getPaddingTop()+stepWidth*count+stepInterval*(count-1);
+        int startX = getPaddingStart()+barWidth/2;
+        int stopX = getPaddingStart()+barWidth/2;
         if (textLocation==TEXT_LOCATION_LEFT){
-            startY += textMaxHeight+distanceFromText;
-            stopY += textMaxHeight+distanceFromText;
+            startX += textWidth+distanceFromText;
+            stopX += textWidth + distanceFromText;
         }
+
+        int startY = getPaddingTop()+stepHeight/2;
+        int stopY = startY+stepHeight*currentVal+stepInterval*currentVal;
+
         linePaint.setColor(lineCompletedColor);
-        canvas.drawLine(startX1,startY,stopX1,stopY,linePaint);
+        canvas.drawLine(startX,startY,stopX,stopY,linePaint);
         //画未完成的线
         linePaint.setColor(lineNormalColor);
-        canvas.drawLine(stopX1,startY,stepWidth*count+(count-1)*stepInterval-stepWidth/2,stopY,linePaint);
+        canvas.drawLine(stopX,stopY,stopX,stepHeight*count+(count-1)*stepInterval-stepHeight/2,linePaint);
 
         //画步骤点
-        int left = getPaddingStart();
+        int top = getPaddingTop();
         for (int i=0;i<count;i++){
             if (i==currentVal){
-                drawStepPointBitmap(canvas,ongoingBitmap,left,ongoingPointWidth);
+                drawStepPoint(canvas,ongoingDrawable,top,ongoingPointWidth);
+//                drawStepPointBitmap(canvas,ongoingBitmap,top,ongoingPointWidth);
             }else if (i<currentVal){
-                drawStepPointBitmap(canvas,completedBitmap,left,completedPointWidth);
+                drawStepPoint(canvas,completedDrawable,top,ongoingPointWidth);
+//                drawStepPointBitmap(canvas,completedBitmap,top,completedPointWidth);
             }else if (i>currentVal){
-                drawStepPointBitmap(canvas,normalBitmap,left,normalPointWidth);
+                drawStepPoint(canvas,normalDrawable,top,ongoingPointWidth);
+//                drawStepPointBitmap(canvas,normalBitmap,top,normalPointWidth);
             }
-            left = left + stepWidth + stepInterval;
+            top = top + stepHeight + stepInterval;
         }
 
         //画文字
         canvas.save();
-        canvas.translate(0,textLocation==0?barHeight+distanceFromText+getPaddingTop():getPaddingTop());
+        canvas.translate(textLocation==TEXT_LOCATION_RIGHT?barWidth+distanceFromText+getPaddingStart():getPaddingStart(),getPaddingTop()+stepHeight/2);
+
         for(int i=0;i<staticLayouts.size();i++){
+            int dy = 0;
+            if (i==currentVal){
+                dy = ongoingPointWidth/2;
+            }else if (i<currentVal){
+                dy = completedPointWidth/2;
+            }else if (i>currentVal){
+                dy = normalPointWidth/2;
+            }
+            canvas.translate(0,-dy);
             staticLayouts.get(i).draw(canvas);
-            canvas.translate(stepWidth+stepInterval,0);
+            canvas.translate(0,dy);
+            canvas.translate(0,stepHeight+stepInterval);
         }
         canvas.restore();
 
@@ -268,17 +284,16 @@ public class VerticalStepView extends View {
         int mode = MeasureSpec.getMode(measureSpec);
         int size = MeasureSpec.getSize(measureSpec);
         int trueSize = 0;
+        barWidth = getBarWidth();
+        textWidth = setMultiTextStaticLayouts(size-getPaddingStart()-getPaddingEnd()-barWidth-distanceFromText);
         switch (mode){
             case MeasureSpec.UNSPECIFIED://测量模式是不作限制，一般是在ScrollView中
             case MeasureSpec.AT_MOST://如果测量模式是当前尺寸能取的最大值，当wrap-content时
-                //这时候size是父View的size，因为是wrap-content，我们应该测量自己的大小
-                //获取View的宽度
-                trueSize = count*stepWidth+(count-1)*stepInterval+getPaddingStart()+getPaddingEnd();
+//              //这时候size是父View的size，因为是wrap-content，我们应该测量自己的大小
+//              //获取View的宽度
+                trueSize = getPaddingStart() + getPaddingEnd() + barWidth + distanceFromText + textWidth;
                 break;
             case MeasureSpec.EXACTLY://如果测量模式是精确值，也就是固定的大小
-                if (stepWidthMode==STEP_WIDTH_MODE_AVERAGE){
-                    stepWidth = (size-stepInterval*(count-1))/count;//这时候每个步骤项的宽度，为总宽度除以步骤的数量
-                }
                 trueSize = size;//这时候size是我们xml设置的值
                 break;
         }
@@ -294,71 +309,75 @@ public class VerticalStepView extends View {
             case MeasureSpec.UNSPECIFIED://测量模式是不作限制，我们这里不做处理
             case MeasureSpec.AT_MOST://如果测量模式是当前尺寸能取的最大值，当wrap-content时
                 //这时候size是父View的size，因为是wrap-content，我们应该测量自己的大小
-                //获取步骤条的高度
-                barHeight = getBarHeight();
-                if (descriptions.size() != 0) {
-                    //如果有说明文字，那么高度的大小就要加上说明文字中的最大高度
-                    textMaxHeight = getMultiTextMaxHeight();
-                    trueSize = barHeight + textMaxHeight + getPaddingTop() + getPaddingBottom() + distanceFromText;
-                } else {
-                    trueSize = barHeight + getPaddingTop() + getPaddingBottom() + distanceFromText;
-                }
+                //获取View的高度
+                trueSize = count*stepHeight+(count-1)*stepInterval+getPaddingTop()+getPaddingBottom();
                 break;
             case MeasureSpec.EXACTLY://如果测量模式是精确值，也就是固定的大小
+                if (stepHeightMode==STEP_HEIGHT_MODE_AVERAGE){
+                    stepHeight = (size-stepInterval*(count-1))/count;//这时候每个步骤项的宽度，为总宽度除以步骤的数量
+                }
                 trueSize = size;//这时候size是我们xml设置的值
+
                 break;
         }
         return trueSize;
     }
 
 
-    //画Bitmap步骤点
-    private void drawStepPointBitmap(Canvas canvas,Bitmap bitmap,int left,int setWidth){
-        Rect srcRect = new Rect(0,0,bitmap.getWidth(),bitmap.getHeight());
-
-        int destLeft;
-        int destTop = textLocation==TEXT_LOCATION_LEFT?getPaddingTop()+textMaxHeight+distanceFromText:getPaddingTop();
+    private void drawStepPoint(Canvas canvas,Drawable drawable,int top,int setWidth){
+        int destLeft = textLocation==TEXT_LOCATION_LEFT?getPaddingStart()+textWidth+distanceFromText:getPaddingStart();
+        int destTop;
         int destRight;
         int destBottom;
+
         if (setWidth==0){
             //如果没有设置图片的宽高
-            if (bitmap.getWidth()>=stepWidth){
-                destLeft = left;
-                destRight = destLeft+stepWidth;
+            if (drawable.getIntrinsicHeight()>=stepHeight){
+                destTop = top;
+                destBottom = destTop+ stepHeight;
             }else {
-                destLeft = left+stepWidth/2-bitmap.getWidth()/2;
-                destRight = destLeft+bitmap.getWidth();
+                destTop = top +stepHeight/2 - drawable.getIntrinsicHeight()/2;
+                destBottom = destTop+drawable.getIntrinsicHeight();
             }
-            if (bitmap.getHeight()>stepWidth){
-                destBottom = destTop+stepWidth;
+            if (drawable.getIntrinsicWidth()>stepHeight){
+                destRight = destLeft+stepHeight;
             }else {
-                destTop += barHeight/2-bitmap.getHeight()/2;
-                destBottom = destTop+bitmap.getHeight();
+                destLeft += barWidth/2 - drawable.getIntrinsicWidth()/2;
+                destRight = destLeft+drawable.getIntrinsicHeight();
             }
         }else {
-           if (setWidth>=stepWidth){
-               destLeft = left;
-               destRight = destLeft+stepWidth;
-               destBottom = destTop+stepWidth;
-           }else {
-               destLeft = left+stepWidth/2-setWidth/2;
-               destRight = destLeft+setWidth;
-               destTop += barHeight/2-setWidth/2;
-               destBottom = destTop + setWidth;
-           }
+            if (setWidth>=stepHeight){
+                destTop = top;
+                destRight = destLeft+stepHeight;
+                destBottom = destTop+stepHeight;
+            }else {
+                destLeft = barWidth/2-setWidth/2;
+                destRight = destLeft+setWidth;
+                destTop = top+stepHeight/2-setWidth/2;
+                destBottom = destTop + setWidth;
+            }
         }
-        Rect destRect = new Rect(destLeft,destTop,destRight,destBottom);
-        canvas.drawBitmap(bitmap,srcRect,destRect,linePaint);
+
+        drawable.setBounds(destLeft,destTop,destRight,destBottom);
+        drawable.draw(canvas);
     }
 
 
-    //获得步骤条的高度
-    private int getBarHeight(){
-        int normalHeight = normalPointWidth==0?normalBitmap.getHeight():normalPointWidth;
-        int ongoingHeight = ongoingPointWidth==0?ongoingBitmap.getHeight():ongoingPointWidth;
-        int completedHeight = completedPointWidth==0?completedBitmap.getHeight():completedPointWidth;
-        int max = getMax(normalHeight, ongoingHeight, completedHeight, lineWidth);
-        return max>stepWidth?stepWidth:max;
+
+    //获得步骤条的宽度
+    private int getBarWidth(){
+        //在这里获得各个图片的宽度
+        if (normalDrawable!=null){
+            normalPointWidth = normalPointWidth==0?normalDrawable.getIntrinsicWidth():normalPointWidth;
+        }
+        if (ongoingDrawable!=null){
+            ongoingPointWidth = ongoingPointWidth==0?ongoingDrawable.getIntrinsicWidth():ongoingPointWidth;
+        }
+        if (completedDrawable!=null){
+            completedPointWidth = completedPointWidth==0?completedDrawable.getIntrinsicWidth():completedPointWidth;
+        }
+        int max = getMax(normalPointWidth, ongoingPointWidth, completedPointWidth, lineWidth);
+        return max>stepHeight?stepHeight:max;
     }
 
 
@@ -373,8 +392,8 @@ public class VerticalStepView extends View {
         return temp;
     }
 
-    //获得多个Text最大的高度
-    private int getMultiTextMaxHeight(){
+    //设置多个Text的StaticLayout
+    private int setMultiTextStaticLayouts(int size){
         int temp = 0;
         staticLayouts.clear();
         for (int i=0;i<descriptions.size();i++){
@@ -388,14 +407,20 @@ public class VerticalStepView extends View {
             }else if (i<currentVal){
                 textPaint.setColor(descCompletedTextColor);
             }
-            StaticLayout staticLayout = new StaticLayout(descriptions.get(i),textPaint,stepWidth, Layout.Alignment.ALIGN_CENTER,1,0,true);
-            staticLayouts.add(staticLayout);
-            if (staticLayout.getHeight()>temp){
-                temp = staticLayout.getHeight();
+            int width = (int) Math.ceil(StaticLayout.getDesiredWidth(descriptions.get(i), textPaint));
+            if (width>size){
+                width = size;
             }
+            if (width>temp){
+                temp = width;
+            }
+            StaticLayout staticLayout = new StaticLayout(descriptions.get(i),textPaint, width, Layout.Alignment.ALIGN_NORMAL,1,0,true);
+            staticLayouts.add(staticLayout);
         }
         return temp;
     }
+
+
 
     //设置说明文字
     public void setDescriptions(List<String> descs){
